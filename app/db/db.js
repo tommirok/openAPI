@@ -7,7 +7,7 @@ const sequelize = new Sequelize('tasks', '', '', {
     acquire: 30000,
     idle: 10000
   },
-  storage: "db/database.sqlite"
+  storage: "./app/db/database.sqlite"
 });
 
 module.exports = {

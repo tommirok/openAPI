@@ -1,18 +1,19 @@
-const express = require('express'),
-  app = express(),
-  bodyParser = require('body-parser');
-  port = process.env.PORT || 3000;
+const express = require("express");
+const bodyParser = require("body-parser");
+const faker = require("faker");
+const times = require("lodash.times");
+const random = require("lodash.random");
+const db = require("./app/models");
+const apiTask = require("./app/routes/task");
+const apiUser = require("./app/routes/user");
+const models = require("./app/models")
 
-
-// connection configurations
-app.use(bodyParser.urlencoded({ extended: true }));
+const app = express();
 app.use(bodyParser.json());
+app.use(express.static("app/public"));
+apiUser(app, db);
+
+apiTask(app, db);
 
 
-
-
-app.get("/", (request, response) => {
-  response.sendStatus(200);
-});
-app.listen(process.env.PORT);
-console.log('API server started on: ' + port);
+app.listen(8080, () => console.log("App listening on port 8080!"));
