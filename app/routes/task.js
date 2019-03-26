@@ -1,6 +1,5 @@
 module.exports = (app, db) => {
   app.get("/tasks", (req, res) => {
-    res.header("Content-Type", "application/json");
     if (req.query.id) {
       db.Task.findOne({
         where: {
@@ -25,8 +24,12 @@ module.exports = (app, db) => {
   });
 
   app.get("/task/:id", (req, res) => {
-    console.log(req.query.id);
-    db.Task.findById(req.query.id).then(result => res.json(result));
+    console.log(req.params.id);
+    db.Task.findOne({
+      where: {
+        id: req.params.id
+      }
+    }).then(result => res.send(JSON.stringify(result, null, 4)));
   });
 
   app.post("/task", (req, res) =>

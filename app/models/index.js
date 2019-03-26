@@ -2,7 +2,20 @@ var Database = require("../db/db");
 const faker = require("faker");
 const times = require("lodash.times");
 const random = require("lodash.random");
+const mocks = require("./mocks");
+const topics = mocks.topics();
+const cities = mocks.cities();
+const deadlines = mocks.deadlines();
+let i = 0
+//mock id:s for initializing the Association join table
+const mockid = () => {
+	let arr = [...Array(200).keys()];
+	i++
+	console.log(arr[i])
+	return arr[i]
+}
 
+//DEFINE TABLES >>>>>>>>>>>>>>>>>>>>
 var Task = Database.sequelize.define(
   "Task",
   {
@@ -46,85 +59,79 @@ var UserTask = Database.sequelize.define(
   {
     UserId: {
       type: Database.DataTypes.INTEGER,
-			unique: false,
-			constraints: false
-
+      validate: {
+        unique: true
+      }
     },
     TaskId: {
       type: Database.DataTypes.INTEGER,
-			unique: false,
-			constraints: false
-
-		},
+      unique: false,
+      constraints: false
+    }
   },
-  // No attributes required, just the userId and todoId
-  // You could add something else here like a favorites boolean field so a user
-  //   can mark a todo as "favorited".
-
   { tableName: "UserTask" }
 );
+//DEFINE TABLES END <<<<<<<<<<<<<
 
-User.hasMany(Task);
+//creates relation for User and UserTask
 User.belongsToMany(Task, {
   through: {
-    model: "UserTask",
+    model: UserTask,
     unique: false
   },
-  constraints: false
-});
-Task.hasMany(User);
-Task.belongsToMany(User, {
-  through: {
-    model: "UserTask",
-    unique: false
-  },
+  foreignKey: "UserId",
   constraints: false
 });
 
+//creates relation for Task and UserTask
+Task.belongsToMany(User, {
+  through: {
+    model: UserTask,
+    unique: false
+  },
+  foreignKey: "TaskId",
+  constraints: false
+});
+//Init Users
 User.sync({ force: true }).then(() => {
   User.bulkCreate(
-    times(10, () => ({
+    times(100, () => ({
       username: faker.name.firstName()
     }))
   ).catch(err => {
     console.log(err);
   });
 });
+
+//Init Tasks
 Task.sync({ force: true }).then(() => {
   Task.bulkCreate(
-    times(10, () => ({
-      title: faker.lorem.sentence(),
-      topic: "software",
-      briefing: "testing must be done to these test devices by these means",
-      location: "Helsinki",
-      deadLine: "",
+		times(100, () => ({
+      title: faker.lorem.word(),
+      topic: topics[random(1, 5)],
+      briefing: faker.lorem.paragraph(),
+      location: cities[random(1, 5)],
+      deadLine: deadlines[random(1, 100)],
       done: false
     }))
   );
 });
+
+//Syncs Join table and creates some init associations
 UserTask.sync({ force: true }).then(() => {
   UserTask.bulkCreate(
-    times(10, () => ({
-      UserId: random(1, 10),
-      TaskId: random(1, 10)
+    times(50, () => ({
+      UserId: mockid(),
+      TaskId: mockid() -1 
     }))
   ).catch(err => {
     console.log(err);
   });
 });
 
+
 module.exports = {
   Task: Task,
   User: User,
   UserTask: UserTask
 };
-/* return Task.create({
-	title: "do testing",
-	topic: "software",
-	briefing: "testing must be done to these test devices by these means",
-	location: "Helsinki",
-	startDate: "16/3/1991",
-	deadLine: "",
-	done: false,
-	UserId: random(1, 10)
-}); */
