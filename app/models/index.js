@@ -20,11 +20,7 @@ var Task = Database.sequelize.define(
   },
   { tableName: "Task" }
 );
-Task.associate = () => {
-  Task.belongsToMany(User, {
-    through: "UserTask"
-  });
-};
+
 var User = Database.sequelize.define(
   "User",
   {
@@ -44,43 +40,56 @@ var User = Database.sequelize.define(
 
   { tableName: "User" }
 );
-User.associate = () => {
-  User.belongsToMany(Task, {
-    through: "UserTask"
-  });
-};
+
 var UserTask = Database.sequelize.define(
   "UserTask",
+  {
+    UserId: {
+      type: Database.DataTypes.INTEGER,
+			unique: false,
+			constraints: false
+
+    },
+    TaskId: {
+      type: Database.DataTypes.INTEGER,
+			unique: false,
+			constraints: false
+
+		},
+  },
   // No attributes required, just the userId and todoId
   // You could add something else here like a favorites boolean field so a user
   //   can mark a todo as "favorited".
-  { role: Database.DataTypes.STRING },
+
   { tableName: "UserTask" }
 );
 
-UserTask.associate = models => {
-  UserTask.belongsTo(models.Products);
-  UserTask.belongsTo(models.Invoices);
-};
-/* User.belongsToMany(Task, {
-  through: UserTask,
-  foreignKey: "UserId"
-});
-Task.belongsToMany(User, {
-  through: UserTask,
-  foreignKey: "TaskId"
-});
- */
 User.hasMany(Task);
+User.belongsToMany(Task, {
+  through: {
+    model: "UserTask",
+    unique: false
+  },
+  constraints: false
+});
 Task.hasMany(User);
+Task.belongsToMany(User, {
+  through: {
+    model: "UserTask",
+    unique: false
+  },
+  constraints: false
+});
+
 User.sync({ force: true }).then(() => {
   User.bulkCreate(
     times(10, () => ({
       username: faker.name.firstName()
     }))
-  );
+  ).catch(err => {
+    console.log(err);
+  });
 });
-
 Task.sync({ force: true }).then(() => {
   Task.bulkCreate(
     times(10, () => ({
@@ -89,9 +98,19 @@ Task.sync({ force: true }).then(() => {
       briefing: "testing must be done to these test devices by these means",
       location: "Helsinki",
       deadLine: "",
-      done: false,
+      done: false
     }))
   );
+});
+UserTask.sync({ force: true }).then(() => {
+  UserTask.bulkCreate(
+    times(10, () => ({
+      UserId: random(1, 10),
+      TaskId: random(1, 10)
+    }))
+  ).catch(err => {
+    console.log(err);
+  });
 });
 
 module.exports = {

@@ -10,6 +10,9 @@ module.exports = (app, db) => {
     }).then(result => res.send(JSON.stringify(result, null, 4)));
   });
   app.get("/user/:id", (req, res) =>
-    db.author.findById(req.params.id).then(result => res.json(result))
+    db.UserTask.findAll().then(result => res.json(result))
+  );
+  app.get("/user/task", (req, res) =>
+    db.UserTask.findAll(req.params.id).then(result => res.json(result))
   );
 };
