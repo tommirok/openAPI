@@ -11,7 +11,6 @@ let i = 0
 const mockid = () => {
 	let arr = [...Array(200).keys()];
 	i++
-	console.log(arr[i])
 	return arr[i]
 }
 
@@ -28,7 +27,7 @@ var Task = Database.sequelize.define(
     topic: Database.DataTypes.STRING,
     briefing: Database.DataTypes.TEXT,
     location: Database.DataTypes.STRING,
-    deadLine: Database.DataTypes.STRING,
+    deadLine: Database.DataTypes.DATEONLY,
     done: Database.DataTypes.BOOLEAN
   },
   { tableName: "Task" }
@@ -58,10 +57,10 @@ var UserTask = Database.sequelize.define(
   "UserTask",
   {
     UserId: {
-      type: Database.DataTypes.INTEGER,
-      validate: {
-        unique: true
-      }
+			type: Database.DataTypes.INTEGER,
+			unique: false,
+			constraints: false
+
     },
     TaskId: {
       type: Database.DataTypes.INTEGER,
@@ -96,7 +95,7 @@ Task.belongsToMany(User, {
 User.sync({ force: true }).then(() => {
   User.bulkCreate(
     times(100, () => ({
-      username: faker.name.firstName()
+      username: faker.internet.email()
     }))
   ).catch(err => {
     console.log(err);
