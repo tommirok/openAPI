@@ -98,7 +98,7 @@ module.exports = (app, db) => {
       //validating body
       check(["userId", "taskId"])
         .isNumeric()
-        .withMessage("id parameters must be number")
+        .withMessage("id parameters must be number, also make sure you typed keys correctly")
     ],
     (req, res) => {
       //this catches validation errors and notifies requesting party
@@ -119,9 +119,11 @@ module.exports = (app, db) => {
           if (result[1]) {
             //result[1] is true if relation was created, if it was found its false
             result.push("user and task was linked");
+            result.splice(1,1)
             res.status(200).send(JSON.stringify(result, null, 4));
           } else {
             result.push("already linked");
+            result.splice(1,1)
             res.status(422).send(JSON.stringify(result, null, 4));
           }
         })

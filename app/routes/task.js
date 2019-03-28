@@ -18,20 +18,50 @@ module.exports = (app, db) => {
         });
     }
   });
-
-  app.get("/task/:id", (req, res) => {
-    console.log(req.params.id);
-    db.Task.findOne({
-      where: {
-        id: req.params.id
-      },
-      include: [
-        {
-          all: true
+  /**
+   * jsdoc for swagger
+   *
+   * @swagger
+   * /tasks:
+   *   get:
+   *     description: get all tasks
+   *     produces:
+   *       - application/json
+   *     responses:
+   *       200:
+   *         description: login
+   */
+  app.get(
+    "/task/:id",
+    [
+      param("id")
+        .isNumeric()
+        .withMessage("id parameter must be number")
+    ],
+    (req, res) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+      }
+      db.Task.findOne({
+        where: {
+          id: req.params.id
+        },
+        include: [
+          {
+            all: true
+          }
+        ]
+      }).then(result => {
+        if (result) {
+          res.status(200).send(JSON.stringify(result, null, 4));
+        } else {
+          result = "task was not found with this id";
+          res.status(404).send(JSON.stringify(result, null, 4));
         }
-      ]
-    }).then(result => res.send(JSON.stringify(result, null, 4)));
-  });
+      });
+    }
+  );
 
   app.post(
     "/task",
@@ -106,16 +136,42 @@ module.exports = (app, db) => {
           }
         }
       ).then(result => {
-        res.status(200).send(JSON.stringify(result, null, 4));
+        if (result[0] === 1) {
+          result.push("task was updated");
+          res.status(200).send(JSON.stringify(result, null, 4));
+        } else {
+          result.push("no such taskId found");
+          res.status(404).send(JSON.stringify(result, null, 4));
+        }
       });
     }
   );
 
-  app.delete("/task", (req, res) => {
-    db.Task.destroy({
-      where: {
-        id: req.body.id
+  app.delete(
+    "/task/:id",
+    [
+      param("id")
+        .isNumeric()
+        .withMessage("id parameter must be number")
+    ],
+    (req, res) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
       }
-    }).then(result => res.json(result));
-  });
+      db.Task.destroy({
+        where: {
+          id: req.params.id
+        }
+      }).then(result => {
+        if (result) {
+          result = "task was deleted";
+          res.status(200).send(JSON.stringify(result, null, 4));
+        } else {
+          result = "no such taskId found";
+          res.status(404).send(JSON.stringify(result, null, 4));
+        }
+      });
+    }
+  );
 };
