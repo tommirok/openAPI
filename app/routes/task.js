@@ -42,7 +42,7 @@ module.exports = (app, db) => {
       check("location").exists(),
       check("deadLine")
         .isISO8601()
-        .withMessage("deadline must be numeric ex 01-01-2020 ")
+        .withMessage("deadline must be as yyyy-mm-dd ")
     ],
     (req, res) => {
       const { title, topic, briefing, location, deadLine } = req.body;
@@ -76,18 +76,36 @@ module.exports = (app, db) => {
     }
   );
 
-  app.put("/task/:id", (req, res) =>
-    db.Task.update(
-      {
-        title: req.body.title,
-        content: req.body.content
-      },
-      {
-        where: {
-          id: req.params.id
-        }
+  app.put(
+    "/task",
+    [
+      check("id")
+        .exists()
+        .isNumeric()
+        .withMessage("id parameter must be numeric"),
+      check("deadLine").optional().isISO8601().withMessage("date must be as yyyy-mm-dd")
+    ],
+    (req, res) => {
+      const { id, location, deadLine, done } = req.body;
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
       }
-    ).then(result => res.json(result))
+      db.Task.update(
+        {
+          location: location,
+          deadLine: deadLine,
+          done: done
+        },
+        {
+          where: {
+            id: id
+          }
+        }
+      ).then(result => {
+        res.status(200).send(JSON.stringify(result, null, 4));
+      });
+    }
   );
 
   app.delete("/post/:id", (req, res) =>
