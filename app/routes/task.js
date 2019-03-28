@@ -83,7 +83,10 @@ module.exports = (app, db) => {
         .exists()
         .isNumeric()
         .withMessage("id parameter must be numeric"),
-      check("deadLine").optional().isISO8601().withMessage("date must be as yyyy-mm-dd")
+      check("deadLine")
+        .optional()
+        .isISO8601()
+        .withMessage("date must be as yyyy-mm-dd")
     ],
     (req, res) => {
       const { id, location, deadLine, done } = req.body;
@@ -108,13 +111,11 @@ module.exports = (app, db) => {
     }
   );
 
-  app.delete("/post/:id", (req, res) =>
-    db.post
-      .destroy({
-        where: {
-          id: req.params.id
-        }
-      })
-      .then(result => res.json(result))
-  );
+  app.delete("/task", (req, res) => {
+    db.Task.destroy({
+      where: {
+        id: req.body.id
+      }
+    }).then(result => res.json(result));
+  });
 };
