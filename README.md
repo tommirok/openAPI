@@ -1,7 +1,7 @@
 # openAPI
 
 ```git clone git@github.com:tommirok/openAPI.git```
-or
+---OR---
 ```git clone https://github.com/tommirok/openAPI.git```
 
 ```cd openAPI```
