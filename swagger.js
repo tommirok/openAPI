@@ -29,7 +29,7 @@ module.exports = {
         summary: "Add a new task to the database",
         description: "",
         operationId: "addtask",
-        produces: ["application/xml", "application/json"],
+        produces: ["application/json"],
         parameters: [
           {
             in: "body",
@@ -39,6 +39,33 @@ module.exports = {
             schema: {
               $ref: "#/definitions/Task"
             }
+          },
+          {
+            name: "title",
+            description: "title for task",
+            type: "string"
+          },
+          {
+            name: "topic",
+            description: "software, sports, whhat is the topic of the task",
+
+            type: "string"
+          },
+          {
+            name: "briefing",
+            description: "shohrt briefing to how to get the job started",
+            type: "string"
+          },
+          {
+            name: "location",
+            description: "city or district",
+            type: "string"
+          },
+          {
+            name: "deadLine",
+            description: "date format as iso8601 ",
+            type: "string",
+            format: "date"
           }
         ],
         responses: {
@@ -58,13 +85,13 @@ module.exports = {
         summary: "Update an existing task",
         description: "",
         operationId: "updatetask",
-        consumes: ["application/json", "application/xml"],
-        produces: ["application/xml", "application/json"],
+        consumes: ["application/json"],
+        produces: ["application/json"],
         parameters: [
           {
             in: "body",
             name: "body",
-            description: "task object that needs to be added to the store",
+            description: "task object that needs to be updated",
             required: true,
             schema: {
               type: "object",
@@ -89,6 +116,27 @@ module.exports = {
                 deadLine: "2020-02-02"
               }
             }
+          },
+          {
+            name: "id",
+            description: "task id",
+            type: "integer"
+          },
+          {
+            name: "done",
+            description: "is task done",
+            type: "boolean"
+          },
+          {
+            name: "location",
+            description: "city or district",
+            type: "string"
+          },
+          {
+            name: "deadLine",
+            description: "date format as iso8601 ",
+            type: "string",
+            format: "date"
           }
         ],
         responses: {
@@ -127,7 +175,7 @@ module.exports = {
         summary: "Find task by ID",
         description: "Returns a single task",
         operationId: "gettaskById",
-        produces: ["application/xml", "application/json"],
+        produces: ["application/json"],
         parameters: [
           {
             name: "taskId",
@@ -139,7 +187,7 @@ module.exports = {
         ],
         responses: {
           "200": {
-            description: "successful operation",
+            description: "successful operation"
           },
           "400": {
             description: "Invalid ID supplied"
@@ -155,7 +203,7 @@ module.exports = {
         summary: "Deletes a task",
         description: "",
         operationId: "deletetask",
-        produces: ["application/xml", "application/json"],
+        produces: ["application/json"],
         parameters: [
           {
             name: "taskId",
@@ -184,18 +232,23 @@ module.exports = {
       post: {
         tags: ["user"],
         summary: "Create user",
-        description: "This can only be done by the logged in user.",
+        description: "",
         operationId: "createUser",
-        produces: ["application/xml", "application/json"],
+        produces: ["application/json"],
         parameters: [
           {
             in: "body",
             name: "body",
             description: "Created user object",
-            required: true,
             schema: {
               $ref: "#/definitions/User"
             }
+          },
+          {
+            name: "userName",
+            description: "email adress is valid username",
+            type: "string",
+            format: "email"
           }
         ],
         responses: {
@@ -211,7 +264,7 @@ module.exports = {
         summary: "Links user to specific task by given user id and task id",
         description: "",
         operationId: "createUsersWithArrayInput",
-        produces: ["application/xml", "application/json"],
+        produces: ["application/json"],
         parameters: [
           {
             in: "body",
@@ -254,7 +307,7 @@ module.exports = {
         summary: "Get user by user name and in what tasks user is in",
         description: "",
         operationId: "getUserByName",
-        produces: ["application/xml", "application/json"],
+        produces: ["application/json"],
         parameters: [
           {
             name: "userId",
@@ -284,9 +337,7 @@ module.exports = {
             description: "User not found"
           }
         }
-      },
-      
-      
+      }
     },
     "/user/range/{from}/{to}?": {
       get: {
@@ -294,24 +345,23 @@ module.exports = {
         summary: "Get range of user by id from and to",
         description: "",
         operationId: "getUserByName",
-        produces: ["application/xml", "application/json"],
+        produces: ["application/json"],
         parameters: [
           {
             name: "from",
             in: "path",
-            description:
-              "id where to start ",
             required: true,
-            type: "string"
+            description: "id where to start ",
+            type: "integer"
           },
           {
             name: "to",
             in: "path",
-            description:
-              "id where to end ",
             required: true,
-            type: "string"
-          },
+
+            description: "id where to end ",
+            type: "integer"
+          }
         ],
         responses: {
           "200": {
@@ -332,9 +382,7 @@ module.exports = {
             description: "User not found"
           }
         }
-      },
-      
-      
+      }
     }
   },
   securityDefinitions: {
@@ -357,11 +405,6 @@ module.exports = {
     User: {
       type: "object",
       properties: {
-        id: {
-          type: "integer",
-          format: "int64",
-          example: "101"
-        },
         userName: {
           type: "string",
           format: "email"
@@ -373,6 +416,7 @@ module.exports = {
     },
     Task: {
       type: "object",
+      required: ["title", "topic", "briefing", "deadLine"],
       properties: {
         id: {
           type: "integer",
