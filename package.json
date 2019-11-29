@@ -24,7 +24,7 @@
     "lodash.random": "^3.2.0",
     "lodash.times": "^4.3.2",
     "path": "^0.12.7",
-    "sequelize": "^5.1.0",
+    "sequelize": "^5.15.1",
     "sqlite3": "^4.0.6",
     "swagger-jsdoc": "^3.2.8",
     "swagger-ui-express": "^4.0.2"
